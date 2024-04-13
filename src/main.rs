@@ -17,7 +17,7 @@ enum Direction {
     Right
 }
 
-fn load_data(){
+fn load_data() -> (Grid, Player, Vec<Coin>, Vec<Obstacle>){
     let mut player= Player::new(String::from(""), true, (0, 0));
     let mut obstacles= vec![];
     let mut coins = vec![];
@@ -71,22 +71,25 @@ fn load_data(){
     grid.print_grid();
     
     println!("width: {}, height {}", width, height);
+
+    (grid, player, coins, obstacles)
 }
 
 fn game(){
 
     let mut stdout = stdout();
 
-    load_data();
+    let (mut grid, mut player, mut coins, mut obstacles) = load_data();
     
 
-    let mut play_grid = Grid::new(21, 11);
+    // let mut play_grid = Grid::new(21, 11);
     println!("empty");
-    play_grid.print_grid();
+    grid.print_grid();
 
+    /* 
     let mut player_1 = Player::new(String::from("german"), true, (1, 1));
     let mut obstacles_1: Vec<Obstacle> = vec![Obstacle::new((10, 9)), Obstacle::new((10, 8)), Obstacle::new((10, 7)), Obstacle::new((9, 7))];
-    let mut coins_1: Vec<Coin> = vec![Coin::new((20, 10), 10), Coin::new((2, 5), 10)];
+    let mut coins_1: Vec<Coin> = vec![Coin::new((20, 10), 10), Coin::new((2, 5), 10)];*/
 
     let mut game_on = true;
 
@@ -99,25 +102,25 @@ fn game(){
             match read().unwrap() {
                 Event::Key(event) => {match (event.code, event.kind) {
                     (KeyCode::Right, KeyEventKind::Press)=> {
-                        if !check_collition(&player_1, &obstacles_1, Direction::Right){
+                        if !check_collition(&player, &obstacles, Direction::Right){
                             //println!("error");
-                            player_1.move_right();
+                            player.move_right();
                         }
                     },
                     (KeyCode::Left, KeyEventKind::Press)=> {
-                        if !check_collition(&player_1, &obstacles_1 ,Direction::Left){
-                            player_1.move_left();
+                        if !check_collition(&player, &obstacles,Direction::Left){
+                            player.move_left();
                         }
                     },
 
                     (KeyCode::Up, KeyEventKind::Press)=> {
-                        if !check_collition(&player_1, &obstacles_1 ,Direction::Up){
-                            player_1.move_up();
+                        if !check_collition(&player, &obstacles,Direction::Up){
+                            player.move_up();
                         }
                     }
                     (KeyCode::Down, KeyEventKind::Press)=> {
-                        if !check_collition(&player_1, &obstacles_1, Direction::Down){
-                            player_1.move_down()
+                        if !check_collition(&player, &obstacles, Direction::Down){
+                            player.move_down()
                         }
                     }
 
@@ -126,13 +129,19 @@ fn game(){
                 _ => {},
             }
         }
-        println!("{:?}", (player_1.get_x(), player_1.get_y()));
-        check_coins(&player_1, &mut coins_1);
+        println!("{:?}", (player.get_x(), player.get_y()));
+        check_coins(&player, &mut coins);
         //clear_screen(&mut stdout);
-        play_grid.update_grid(&player_1, &obstacles_1, &coins_1);
-        play_grid.print_grid();
+        grid.update_grid(&player, &obstacles, &coins);
+        grid.print_grid();
         
         sleep(Duration::from_millis(500));
+
+        if coins.is_empty(){
+            println!("you win :D");
+            game_on = false;
+        }
+        
         
     }
 
